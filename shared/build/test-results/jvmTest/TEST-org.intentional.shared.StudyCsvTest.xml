@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.intentional.shared.StudyCsvTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-07T09:44:24.052Z" hostname="thinkyes" time="0.128">
+  <properties/>
+  <testcase name="expiredLaunchSuppressionDoesNotHideLaterOpenings[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.001"/>
+  <testcase name="cancelledOpeningAndDraftAreRetained[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.0"/>
+  <testcase name="observedEntryAndGateDoNotCreateTwoAttempts[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.001"/>
+  <testcase name="retentionNoLongerDropsSessionsAtFiveHundred[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.106"/>
+  <testcase name="formulasAreNeutralizedAndNullsAreBlank[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.0"/>
+  <testcase name="csvContainsSessionOpeningAndExtensionWithStableIds[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.016"/>
+  <testcase name="ongoingExportDoesNotFinalizeOrInventOutcomes[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.001"/>
+  <testcase name="demoDoesNotCreateRealOpeningCounts[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.0"/>
+  <testcase name="deletingStudyRecordsClearsOpeningsButKeepsParticipantId[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.0"/>
+  <testcase name="managedContinuationIsNotCountedTwice[jvm]" classname="org.intentional.shared.StudyCsvTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

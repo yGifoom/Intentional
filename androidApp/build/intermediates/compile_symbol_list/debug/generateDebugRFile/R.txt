@@ -1,0 +1,5 @@
+int drawable ic_intentional 0x0
+int string accessibility_description 0x0
+int style Theme_Intentional 0x0
+int xml accessibility_service 0x0
+int xml study_export_paths 0x0

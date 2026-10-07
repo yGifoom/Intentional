@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.intentional.shared.SessionEngineTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-10-07T09:44:24.009Z" hostname="thinkyes" time="0.038">
+  <properties/>
+  <testcase name="demoCanBeAcceleratedButRealSessionCannot[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.004"/>
+  <testcase name="durationAndRatingBoundsAreEnforced[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.001"/>
+  <testcase name="emptyIntentionCannotStart[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <testcase name="stateRestoresAndDeadlineDoesNotReset[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.004"/>
+  <testcase name="warningOccursOnceAtOneMinuteAndExpiryWins[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.001"/>
+  <testcase name="journalRoundTripPreservesUnicodeQuotesAndExtensions[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.007"/>
+  <testcase name="extensionRequiresReasonAndGetsNewReminder[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <testcase name="switchingAppsDoesNotGrantAccessUnderAnotherAppsSession[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.002"/>
+  <testcase name="reflectionTimeDoesNotCountAsScrolling[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.001"/>
+  <testcase name="olderJournalsStillLoadAsInstagram[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.003"/>
+  <testcase name="youtubeHasSameReminderExpiryAndExtensionFlow[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.003"/>
+  <testcase name="rebootedMonotonicClockExpiresSession[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <testcase name="delayedTickExpiresWithoutLateWarning[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.001"/>
+  <testcase name="repeatedInstagramOpenPreservesPendingIntention[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.001"/>
+  <testcase name="newAppDuringUnstartedDraftGetsItsOwnGate[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <testcase name="onlyNativeSupportedPackagesAreIntercepted[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.001"/>
+  <testcase name="defaultIsFifteenMinutes[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <testcase name="revisitingSameAppPreservesTimer[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <testcase name="completionIsRecordedOnlyOnce[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <testcase name="activeSessionCannotBeOverwrittenOrSilentlyDismissed[jvm]" classname="org.intentional.shared.SessionEngineTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

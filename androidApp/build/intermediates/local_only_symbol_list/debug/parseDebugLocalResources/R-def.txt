@@ -1,0 +1,7 @@
+R_DEF: Internal format may change without notice
+local
+drawable ic_intentional
+string accessibility_description
+style Theme.Intentional
+xml accessibility_service
+xml study_export_paths

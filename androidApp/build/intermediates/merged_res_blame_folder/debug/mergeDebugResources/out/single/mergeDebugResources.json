@@ -1,0 +1,14 @@
+[
+    {
+        "merged": "org.intentional.app.androidApp-debug-37:/drawable_ic_intentional.xml.flat",
+        "source": "org.intentional.app.androidApp-main-39:/drawable/ic_intentional.xml"
+    },
+    {
+        "merged": "org.intentional.app.androidApp-debug-37:/xml_accessibility_service.xml.flat",
+        "source": "org.intentional.app.androidApp-main-39:/xml/accessibility_service.xml"
+    },
+    {
+        "merged": "org.intentional.app.androidApp-debug-37:/xml_study_export_paths.xml.flat",
+        "source": "org.intentional.app.androidApp-main-39:/xml/study_export_paths.xml"
+    }
+]

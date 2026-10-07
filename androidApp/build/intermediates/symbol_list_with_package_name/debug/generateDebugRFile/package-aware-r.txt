@@ -1,0 +1,6 @@
+org.intentional.app
+drawable ic_intentional
+string accessibility_description
+style Theme_Intentional
+xml accessibility_service
+xml study_export_paths
