@@ -1,12 +1,14 @@
-# Collecting study data (0.5.0)
+# Collecting study data (0.7.0)
+
+Collection runs automatically after a one-time data notice, with 512 KiB and one successful upload per 15 minutes per installation account. See [Firebase collection and researcher download](FIREBASE_SUBMISSIONS.md). Participant CSV/JSON export and sending controls are removed. Expiry/extension screens do not ask fulfillment; only the final relaxation/reflection screen records that answer.
 
 ## Participant workflow
 
-Open Intentional and tap **Export study data (CSV)** near the top of Home. It is also available at the bottom of other screens and in the uninstall dialog. Android opens its share chooser: select WhatsApp, Telegram, Gmail, or another installed app that accepts CSV attachments, then choose the recipient and send. Intentional never selects a recipient or sends automatically. Canceling does not change the journal.
+Open Intentional and read the automatic collection notice. **Continue** acknowledges it once; **Close app** leaves with no uploads enabled. After continuing, changed data is uploaded in the background when online, subject to Android scheduling and the 15-minute minimum interval. There is no send/export button and no sharing app to select. Unchanged journals do not upload. Offline changes remain local until retry. Researchers must configure Firebase and deploy the updated rules before distributing study APKs.
 
-The export includes free-text motivations, so participants should send it only to their intended study recipient. A random installation ID identifies repeated exports from the same installation; it is not a name, email, Android device ID, or advertising ID. Researchers can keep their own participant-to-installation mapping. Reinstalling generates a new ID.
+The data includes free-text motivations, so the notice asks participants to avoid names or sensitive details. A random installation ID identifies updates from the same installation; it is not a name, email, Android device ID, or advertising ID. Firebase anonymous authentication adds an account UID. Researchers can keep their own participant-to-installation mapping. Reinstalling generates new identifiers.
 
-Each tap generates a new UTF-8 CSV attachment in app-private cache, shared through a narrowly scoped FileProvider with temporary read access. Android may clear cached copies; the journal remains until the user deletes it or uninstalls. The existing JSON export remains available in Your patterns as an additional history backup.
+Each acknowledged upload replaces the installation's private `latest` CSV with its full current journal. The local journal remains until deletion/uninstall. Only acknowledged snapshots are marked synced; edits arriving while a request is in flight remain pending. A journal over 512 KiB is retained locally but blocked from uploading, so researchers must monitor study duration/data volume and investigate missing updates. No manual participant fallback remains.
 
 ## One CSV, four record types
 
@@ -37,10 +39,11 @@ No 500-session truncation is applied from this version onward. Already-discarded
 
 ## Researcher workflow
 
-Save participants’ CSV attachments into a folder, then run:
+Download the private Firebase CSVs with a researcher account, then aggregate:
 
 ```sh
-python3 scripts/aggregate-study.py /path/to/received-exports --output study-results
+python3 scripts/download-study.py --project YOUR_PROJECT_ID --output study-exports
+python3 scripts/aggregate-study.py study-exports --output study-results
 ```
 
 Python 3.9+ is sufficient; no packages are required. Use a new output folder each run. The script searches the input folder recursively and produces:
@@ -52,4 +55,4 @@ Repeated submissions are deduplicated by participant ID + record type + record I
 
 ## Verify on study phones
 
-Try direct and Intentional-initiated openings, declining the opening prompt, finishing early, extending, canceling export, and sharing to each recipient app used by the study. Confirm one guided launch is not double-counted and that the receiver can open the attachment after Intentional is backgrounded. Export twice and aggregate both: counts should not double. Export during a running session: its after-rating should be blank. Confirm old journals still load and reinstalling changes the participant ID. Full Android sharing and accessibility behavior need on-device verification.
+Try direct and Intentional-initiated openings, declining the opening prompt, finishing early, and extending. Confirm one guided launch is not double-counted. Check notice acknowledgment, automatic updates to `latest`, no unchanged uploads, the cooldown across restart, offline retry, and reboot persistence. Download twice into separate folders and aggregate: counts should not double. A running/paused session should have blank after-rating until answered or timed out. Confirm old journals still load and reinstalling changes the participant ID. Background scheduling, Firebase rules, and accessibility behavior need on-device/emulator verification.

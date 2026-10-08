@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <queries>
@@ -11,10 +14,8 @@
     <application android:name=".IntentionalApplication" android:label="Intentional"
         android:icon="@drawable/ic_intentional" android:theme="@style/Theme.Intentional"
         android:allowBackup="false" android:supportsRtl="true">
-        <provider android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.studyexports" android:exported="false" android:grantUriPermissions="true">
-            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/study_export_paths" />
-        </provider>
+        <service android:name=".StudySyncJobService" android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>

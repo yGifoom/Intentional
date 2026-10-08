@@ -1,0 +1,75 @@
+# Gradle / Kotlin / Android generated output and machine-specific SDK paths
+.gradle/
+.kotlin/
+.build-cache/
+build/
+out/
+.cxx/
+.externalNativeBuild/
+local.properties
+*.class
+*.dex
+*.apk
+*.aab
+*.ap_
+*.hprof
+
+# APK download bundles and temporary tunnel output
+dist/
+
+# IDE metadata and editor/OS temporary files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Python environments, bytecode, and test/tool caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Node dependencies, Firebase emulator state/logs, and coverage output
+node_modules/
+.firebase/
+coverage/
+.nyc_output/
+*.log
+*-debug.log.*
+
+# Private participant data and local analysis output (not CSV test fixtures)
+/responses/
+/study-exports*/
+/study-results*/
+/received-exports/
+
+# Local secrets and signing credentials; example env files may be committed
+.env
+.env.*
+!.env.example
+!.env.sample
+.aws/
+*.jks
+*.keystore
+*.p12
+*.pfx
+key.properties
+keystore.properties
+*-firebase-adminsdk-*.json
+*service-account*.json
+
+# Keep Gradle wrapper JARs, Firebase client config/rules, and dependency lockfiles.
+# Do not ignore all *.jar, *.json, *.csv, or lockfiles: these can be source inputs.

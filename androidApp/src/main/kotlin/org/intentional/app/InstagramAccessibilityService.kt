@@ -20,14 +20,17 @@ import android.os.SystemClock
 import android.view.Gravity
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
-import android.view.inputmethod.InputMethodManager
+import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.intentional.shared.Stage
 import org.intentional.shared.ProtectedApp
+import org.intentional.shared.ForegroundWindow
+import org.intentional.shared.WindowKind
+import org.intentional.shared.foregroundWindowIndex
 
 /** Supports Instagram and YouTube; retain component name so upgrades preserve enabled access.
- * Observes package transitions only. No rootInActiveWindow / node tree access. */
+ * Reads only the focused window root's package name. Never reads node text or children. */
 class InstagramAccessibilityService : AccessibilityService() {
     private val engine get() = (application as IntentionalApplication).engine
     private val handler = Handler(Looper.getMainLooper())
@@ -45,10 +48,7 @@ class InstagramAccessibilityService : AccessibilityService() {
     }
     private val tick = object : Runnable {
         override fun run() {
-            if (!getSystemService(PowerManager::class.java).isInteractive || getSystemService(KeyguardManager::class.java).isKeyguardLocked) {
-                foreground = ""
-                engine.foregroundChanged(null)
-            }
+            observeForeground()
             engine.tick()
             val state = engine.current
             val session = state.session
@@ -88,24 +88,39 @@ class InstagramAccessibilityService : AccessibilityService() {
         handler.post(tick)
     }
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-        val pkg = event.packageName?.toString() ?: return
-        // Our banner/dialog is not a switch away from the social app. Only the activity is.
-        if (pkg == packageName && event.className?.toString() != MainActivity::class.java.name) return
-        if (getSystemService(InputMethodManager::class.java).enabledInputMethodList.any { it.packageName == pkg }) return
+        if (event?.eventType !in listOf(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED, AccessibilityEvent.TYPE_WINDOWS_CHANGED)) return
+        // The sender may be a toast, notification, or banner, not the foreground app.
+        observeForeground()
+    }
+    @Suppress("DEPRECATION") // Recycling is needed on our older supported Android releases.
+    private fun focusedPackage(): String? {
+        if (!getSystemService(PowerManager::class.java).isInteractive ||
+            getSystemService(KeyguardManager::class.java).isKeyguardLocked) return null
+        val visible = windows
+        try {
+            val index = foregroundWindowIndex(visible.map { window ->
+                ForegroundWindow(when (window.type) {
+                    AccessibilityWindowInfo.TYPE_APPLICATION -> WindowKind.APPLICATION
+                    AccessibilityWindowInfo.TYPE_SYSTEM -> WindowKind.SYSTEM
+                    AccessibilityWindowInfo.TYPE_INPUT_METHOD -> WindowKind.KEYBOARD
+                    AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY -> WindowKind.ACCESSIBILITY_OVERLAY
+                    else -> WindowKind.OTHER
+                }, window.isFocused, window.isActive)
+            }) ?: return null
+            val root = visible[index].root ?: return null
+            return try { root.packageName?.toString() } finally { root.recycle() }
+        } finally { visible.forEach { it.recycle() } }
+    }
+    private fun observeForeground() {
+        val pkg = runCatching { focusedPackage() }.getOrNull().orEmpty()
         val targetApp = ProtectedApp.fromPackage(pkg)
-        if (!getSystemService(PowerManager::class.java).isInteractive || getSystemService(KeyguardManager::class.java).isKeyguardLocked) {
-            foreground = ""
-            engine.foregroundChanged(null)
-            return
-        }
         val previous = foreground
         foreground = pkg
         if (pkg != engine.current.session?.app?.androidPackage) removeBanner()
         val state = engine.current
         if (state.demo && state.stage != Stage.HOME && state.stage != Stage.SAVED) return
-        // Pause immediately on Home, another app, system UI, or Intentional itself.
-        // Merely leaving never opens a reflection screen.
+        // Polling also detects returns with no new window-state event (idle screens,
+        // dismissing system panels, unlocking, or restarting the accessibility service).
         engine.foregroundChanged(targetApp)
         if (targetApp != null) {
             if (previous != pkg) engine.recordOpening(targetApp)

@@ -44,15 +44,15 @@ This creates a uniquely named folder in `dist/` containing `index.html`, `intent
 
 1. Open the page and tap **Download for Android**.
 2. Open the APK, allow installation from that browser if Android asks, and confirm installation. A link cannot silently install an Android app.
-3. Open Intentional and try the 75-second demo.
+3. Open Intentional, read the automatic collection notice, and continue to try the 75-second demo.
 4. For Instagram and YouTube interruptions, follow **Set up opening check-ins**. Accessibility must be enabled on each phone. Some devices require **App info → menu → Allow restricted settings** first; wording varies.
-5. At the end of the study, tap **Export study data (CSV)** and use the share chooser to send the attachment to the study researcher. See [collection and aggregation instructions](STUDY_DATA.md).
+5. Study data is collected automatically after the one-time notice. Participants do not export or send files. Researchers must configure Firebase and deploy the current rules before distribution, then use the [collection and aggregation tools](STUDY_DATA.md) to download each installation’s latest CSV.
 
-This distributes a debug prototype for testing, not a Play Store release. Use the same development machine/signing key for updates. A different key cannot replace an existing installation; uninstalling deletes its journal, so export before any deliberate uninstall. Never put signing keys in the download bundle. For a longer-lived study, use a dedicated release key and increment Android’s version code for releases.
+This distributes a debug prototype for testing, not a Play Store release. Use the same development machine/signing key for updates. A different key cannot replace an existing installation; uninstalling deletes its local journal and can lose unsynced changes. Have researchers confirm receipt of the latest study data before a deliberate uninstall. Never put signing keys in the download bundle. For a longer-lived study, use a dedicated release key and increment Android’s version code for releases.
 
 ## Troubleshooting
 
-To remove the prototype, users can tap **Uninstall Intentional** at the bottom of any app screen, optionally export their journal, and continue to Android’s uninstall confirmation. Canceling does not erase data. Alternatively, long-press the Intentional icon → App info → Uninstall. Removing Intentional stops its check-ins and deletes its local journal; Instagram and YouTube remain installed.
+To remove the prototype, users can tap **Uninstall Intentional** at the bottom of any app screen and continue to Android’s uninstall confirmation. Canceling does not erase data. Alternatively, long-press the Intentional icon → App info → Uninstall. Removing Intentional stops check-ins and future uploads and deletes its local journal; received cloud data is not erased. Instagram and YouTube remain installed.
 
 - Campus/guest Wi-Fi may isolate devices; use `--public` or a network without client isolation.
 - If the selected IP belongs to a VPN, use `--host 192.168.x.x` with your computer’s Wi-Fi address.

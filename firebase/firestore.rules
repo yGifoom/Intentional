@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function uuid(value) {
+      return value is string && value.matches('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}');
+    }
+    function validLimit(uid) {
+      let data = request.resource.data;
+      let submission = getAfter(/databases/$(database)/documents/intentionalStudyParticipants/$(uid)/intentionalStudyExports/$(data.lastSubmissionId));
+      return data.keys().hasOnly(['participantId', 'lastSubmissionId', 'lastSubmittedAt'])
+        && uuid(data.participantId) && (data.lastSubmissionId == 'latest' || uuid(data.lastSubmissionId))
+        && data.lastSubmittedAt == request.time
+        && submission.data.uploadedAt == request.time
+        && submission.data.participantId == data.participantId
+        && (data.lastSubmissionId == 'latest' || !exists(/databases/$(database)/documents/intentionalStudyParticipants/$(uid)/intentionalStudyExports/$(data.lastSubmissionId)));
+    }
+    match /intentionalStudyParticipants/{uid} {
+      allow get: if owner(uid);
+      allow list, delete: if false;
+      allow create: if owner(uid) && validLimit(uid);
+      allow update: if owner(uid) && validLimit(uid)
+        && request.resource.data.participantId == resource.data.participantId
+        && request.time >= resource.data.lastSubmittedAt + duration.value(15, 'm');
+
+      match /intentionalStudyExports/{submissionId} {
+        function validExport() {
+          return owner(uid) && (submissionId == 'latest' || uuid(submissionId))
+          && request.resource.data.keys().hasOnly(['participantId', 'schemaVersion', 'contentType', 'csv', 'sha256', 'uploadedAt'])
+          && uuid(request.resource.data.participantId)
+          && request.resource.data.schemaVersion == 1
+          && request.resource.data.contentType == 'text/csv'
+          && request.resource.data.csv is bytes
+          && request.resource.data.csv.size() > 0
+          && request.resource.data.csv.size() <= 524288
+          && request.resource.data.sha256 is string
+          && request.resource.data.sha256.matches('[0-9a-f]{64}')
+          && request.resource.data.uploadedAt == request.time
+          && (!exists(/databases/$(database)/documents/intentionalStudyParticipants/$(uid))
+            || getAfter(/databases/$(database)/documents/intentionalStudyParticipants/$(uid)).data.lastSubmittedAt
+              > get(/databases/$(database)/documents/intentionalStudyParticipants/$(uid)).data.lastSubmittedAt)
+          && getAfter(/databases/$(database)/documents/intentionalStudyParticipants/$(uid)).data.lastSubmittedAt == request.time
+          && getAfter(/databases/$(database)/documents/intentionalStudyParticipants/$(uid)).data.lastSubmissionId == submissionId
+          && getAfter(/databases/$(database)/documents/intentionalStudyParticipants/$(uid)).data.participantId == request.resource.data.participantId;
+        }
+        allow read, delete: if false;
+        allow create: if validExport();
+        // Old UUID snapshots stay immutable; only the installation's canonical CSV is replaceable.
+        allow update: if submissionId == 'latest' && validExport()
+          && request.resource.data.participantId == resource.data.participantId;
+      }
+    }
+    // Everything else is denied by default. When reusing a Firebase project,
+    // merge these specific matches into its rules; NEVER replace existing rules blindly.
+  }
+}

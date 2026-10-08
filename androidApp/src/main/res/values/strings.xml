@@ -1,5 +1,5 @@
 <resources>
-    <string name="accessibility_description">Detect when Instagram or YouTube opens to ask your intention, remind you before your timer ends, and show a reflection when you finish. Only app window changes are observed; screen content and messages are not read. You can disable this service at any time.</string>
+    <string name="accessibility_description">Detect when Instagram or YouTube is in the foreground to ask your intention and time actual usage. Android grants window-content access for this check, but Intentional reads only the window root’s app package name, not text, posts, messages, or child nodes. You can disable this service at any time.</string>
     <style name="Theme.Intentional" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowLightStatusBar">false</item>

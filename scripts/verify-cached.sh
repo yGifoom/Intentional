@@ -46,5 +46,5 @@ mapfile -t sources < <(rg --files shared/src/commonMain androidApp/src/main/kotl
 java -Xmx2g -cp "$compiler_cp" org.jetbrains.kotlin.cli.jvm.K2JVMCompiler \
     -no-stdlib -no-reflect -jvm-target 17 -classpath "$classpath" \
     -Xplugin="$compose_plugin" -d "$out/classes" "${sources[@]}"
-java -cp "$out/classes:$classpath" org.junit.runner.JUnitCore org.intentional.shared.SessionEngineTest org.intentional.shared.StudyCsvTest org.intentional.shared.ForegroundTimerTest
+java -cp "$out/classes:$classpath" org.junit.runner.JUnitCore org.intentional.shared.SessionEngineTest org.intentional.shared.StudyCsvTest org.intentional.shared.ForegroundTimerTest org.intentional.shared.ForegroundWindowTest org.intentional.shared.StudyUploadPolicyTest org.intentional.shared.StudySyncPolicyTest
 printf '\nAll Kotlin sources compiled; session tests passed. No APK was built.\n'

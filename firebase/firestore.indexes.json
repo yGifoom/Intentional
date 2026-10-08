@@ -1,0 +1,6 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "intentionalStudyExports", "fieldPath": "csv", "indexes": [] }
+  ]
+}

@@ -10,6 +10,8 @@ import java.util.UUID
 class IntentionalApplication : Application() {
     lateinit var engine: SessionEngine
         private set
+    lateinit var studySync: StudySyncManager
+        private set
     var recoveryMessage: String? = null
     override fun onCreate() {
         super.onCreate()
@@ -28,8 +30,11 @@ class IntentionalApplication : Application() {
         val bootChanged = prefs.getInt("boot", boot) != boot
         engine = SessionEngine(SystemClock::elapsedRealtime, System::currentTimeMillis, snapshot) {
             prefs.edit().putString("snapshot", SessionEngine.encode(it)).putInt("boot", boot).apply()
+            if (::studySync.isInitialized) studySync.journalChanged()
         }
         engine.recoverAfterRestart(bootChanged)
         prefs.edit().putString("snapshot", SessionEngine.encode(engine.current)).putInt("boot", boot).apply()
+        studySync = StudySyncManager(this, engine)
+        studySync.refresh()
     }
 }

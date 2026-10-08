@@ -32,14 +32,14 @@ private val Violet = Color(0xFFB99AFF)
 private val Muted = Color(0xFFA5A5BA)
 private val Mint = Color(0xFF9BD9C4)
 
-data class DeviceStatus(val protection: Boolean = false, val installedApps: Set<ProtectedApp> = emptySet(), val message: String? = null)
+data class DeviceStatus(val protection: Boolean = false, val installedApps: Set<ProtectedApp> = emptySet(), val message: String? = null,
+    val studyNoticeAcknowledged: Boolean = false)
 interface AppActions {
     fun enableProtection()
     fun speak(onResult: (String) -> Unit)
     fun openApp(app: ProtectedApp): Boolean
     fun leave()
-    fun exportHistory()
-    fun shareStudyData()
+    fun acknowledgeStudyDataNotice()
     fun uninstallApp()
 }
 
@@ -91,8 +91,6 @@ fun IntentionalApp(engine: SessionEngine, device: DeviceStatus, actions: AppActi
                         Spacer(Modifier.height(12.dp))
                         Heading("Make room for", "what you came for.")
                         Body("A small pause before Instagram or YouTube. A moment to check in after.")
-                        Secondary("Export study data (CSV)") { actions.shareStudyData() }
-                        Caption("Includes your written intentions and ratings. Choose an app and recipient to share with.")
                         if (s.openings.isNotEmpty()) Caption(ProtectedApp.entries.joinToString(" · ") { app ->
                             "${app.label}: ${s.openings.count { it.app == app }} opening attempts"
                         })
@@ -124,8 +122,8 @@ fun IntentionalApp(engine: SessionEngine, device: DeviceStatus, actions: AppActi
                                 Text("Did scrolling give you what you needed?", color = Violet, fontWeight = FontWeight.SemiBold)
                                 Text("Capture why you opened the app and how you felt afterward. Your patterns start with your own answers.", color = Muted, fontSize = 14.sp)
                             }
-                            Caption("Your session journal stays on this device.\nYou’re in control, every step of the way.")
-                        } else History(s.history, actions, { deleteDialog = true }, s.openings.isNotEmpty())
+                            Caption("Study records are collected automatically, as explained in the study notice.")
+                        } else History(s.history, { deleteDialog = true }, s.openings.isNotEmpty())
                     }
                     Stage.GATE -> {
                         Hero("pause")
@@ -203,9 +201,10 @@ fun IntentionalApp(engine: SessionEngine, device: DeviceStatus, actions: AppActi
                         Hero("hourglass")
                         Heading("Your planned", "${s.app.label} time is up.")
                         Intention(s.session!!.intention, s.app)
-                        Body("Did you finish what you came to do?")
-                        OutcomeButtons(yes = { engine.reflect() }, no = { engine.requestExtension() })
-                        Caption("You’re in control. Continuing starts with a new intention and a time limit.")
+                        Body("Choose whether to stop or continue. You’ll rate your relaxation and answer one fulfillment question when you finish.")
+                        Primary("Finish and check in") { engine.reflect() }
+                        Secondary("Add more time") { engine.requestExtension() }
+                        Caption("Continuing requires a reason and a new time limit.")
                     }
                     Stage.EXTEND -> {
                         Heading("A moment to pause.", "What’s still left to do?")
@@ -243,14 +242,19 @@ fun IntentionalApp(engine: SessionEngine, device: DeviceStatus, actions: AppActi
                         Secondary("See my patterns") { engine.home(); tab = 1 }
                     }
                 }
-                if (s.stage != Stage.HOME) TextButton(onClick = { actions.shareStudyData() }) { Text("Export study data (CSV)") }
                 TextButton(onClick = { uninstallDialog = true }) { Text("Uninstall Intentional", color = Muted) }
                 Spacer(Modifier.height(8.dp))
             }
         }
+        if (!device.studyNoticeAcknowledged) AlertDialog(onDismissRequest = {},
+            title = { Text("Automatic study data collection") },
+            text = { Text("Using Intentional for this study includes automatic background data collection. After you continue, changed study records are sent to the research team’s private Firebase service when online, no more than once every 15 minutes. You don’t need to send or export anything.\n\nSent records include: your pseudonymous installation identifiers; Instagram/YouTube opening attempts and timestamps; written or transcribed intentions and extension reasons; purpose; selected durations and actual tracked usage; relaxation ratings before/after; and Yes/No task-fulfillment answers. Demo records are included and labeled.\n\nNo posts, messages, passwords, contacts, or audio recordings are collected by Intentional. Written intentions can contain personal information, so avoid including names or sensitive details. Your journal remains on this device. Uninstalling stops future collection, but does not erase data already received or downloaded by the research team.",
+                modifier = Modifier.heightIn(max = 420.dp).verticalScroll(rememberScrollState())) },
+            confirmButton = { TextButton({ actions.acknowledgeStudyDataNotice() }) { Text("Continue") } },
+            dismissButton = { TextButton({ actions.leave() }) { Text("Close app") } })
         }
         if (disclosure) AlertDialog(onDismissRequest = { disclosure = false }, title = { Text("Enable app check-ins") },
-            text = { Text("Intentional uses Android Accessibility access to detect which app opens and show check-ins over Instagram and YouTube. It does not read your posts, messages, or screen content. Session intentions and ratings are stored on this device.\n\nIn Settings, choose Intentional and enable the service. You can turn it off there at any time.") },
+            text = { Text("Intentional uses Android Accessibility access to check the focused app window every half second and show check-ins over Instagram and YouTube. Android requires window-content access for this. Intentional reads only the root’s app package name, never text, posts, messages, or child nodes. Study records are stored locally and sent automatically to the research team, as described in the study notice.\n\nIn Settings, choose Intentional and enable the service. You can turn it off there at any time.") },
             confirmButton = { TextButton({ disclosure = false; actions.enableProtection() }) { Text("Agree & open Settings") } },
             dismissButton = { TextButton({ disclosure = false }) { Text("Not now") } })
         if (uninstallDialog) AlertDialog(
@@ -259,17 +263,14 @@ fun IntentionalApp(engine: SessionEngine, device: DeviceStatus, actions: AppActi
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text("Uninstalling stops the check-ins and removes your journal and any current session from this device. Instagram and YouTube stay installed.\n\nAndroid will ask you to confirm. You can cancel without losing your data.")
-                    if (s.history.isNotEmpty() || s.openings.isNotEmpty() || s.session != null) TextButton(onClick = {
-                        uninstallDialog = false
-                        actions.shareStudyData()
-                    }) { Text("Export my journal first") }
+                    Text("Uninstalling stops future uploads. Unsynced changes may be lost; study data already received by the team is not erased.")
                 }
             },
             confirmButton = { TextButton({ uninstallDialog = false; actions.uninstallApp() }) { Text("Continue to uninstall") } },
             dismissButton = { TextButton({ uninstallDialog = false }) { Text("Keep the app") } },
         )
         if (deleteDialog) AlertDialog(onDismissRequest = { deleteDialog = false }, title = { Text("Delete your session journal?") },
-            text = { Text("This removes saved sessions and opening counts from this device. It cannot be undone. Export your study CSV first if you need these records.") },
+            text = { Text("This removes saved sessions and opening counts from this device. It cannot be undone. The next automatic sync will replace your latest study snapshot with the remaining journal. Previous researcher downloads and older submitted snapshots are not erased.") },
             confirmButton = { TextButton({ engine.clearHistory(); deleteDialog = false }) { Text("Delete journal") } },
             dismissButton = { TextButton({ deleteDialog = false }) { Text("Keep it") } })
     }
@@ -405,7 +406,7 @@ fun IntentionalApp(engine: SessionEngine, device: DeviceStatus, actions: AppActi
         }
     }
 }
-@Composable private fun History(history: List<Session>, actions: AppActions, clear: () -> Unit, hasOpenings: Boolean) {
+@Composable private fun History(history: List<Session>, clear: () -> Unit, hasOpenings: Boolean) {
     val real = history.filter { !it.demo }
     val relax = real.filter { it.purpose == Purpose.RELAX && it.after != null }
     Panel {
@@ -430,9 +431,6 @@ fun IntentionalApp(engine: SessionEngine, device: DeviceStatus, actions: AppActi
             Text("Relaxation ${result.before}/5 → ${result.after?.let { "$it/5" } ?: "N/A"}", color = Muted, fontSize = 13.sp)
             result.extensions.forEach { Text("+${it.minutes}m · ${it.reason}", color = Muted, fontSize = 12.sp) }
         }
-    }
-    if (history.isNotEmpty()) {
-        Secondary("Export session journal (JSON)") { actions.exportHistory() }
     }
     if (history.isNotEmpty() || hasOpenings) TextButton(clear) { Text("Delete journal", color = Muted) }
 }
